@@ -183,7 +183,7 @@ class Task(Generic[T]):
             positional = [
                 x.name
                 for x in self.argspec(self.body).parameters.values()
-                if x.default is inspect.Signature.empty
+                if x.default is inspect.Signature.empty and x.kind not in (x.VAR_POSITIONAL, x.VAR_KEYWORD)
             ]
         return positional
 
@@ -258,7 +258,8 @@ class Task(Generic[T]):
         # Build arg list (arg_opts will take care of setting up shortnames,
         # etc)
         args = []
-        for param in sig.parameters.values():
+        params = [p for p in sig.parameters.values() if p.kind not in (p.VAR_POSITIONAL, p.VAR_KEYWORD)]
+        for param in params:
             new_arg = Argument(
                 **self.arg_opts(param.name, param.default, taken_names)
             )
